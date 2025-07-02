@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBmNzMJXx2HR4ySUlBMOuQvCdbTvqoGF9I",
+        authDomain: "cebadinapury-90293.firebaseapp.com",
+        projectId: "cebadinapury-90293",
+        storageBucket: "cebadinapury-90293.firebasestorage.app",
+        messagingSenderId: "213298592355",
+        appId: "1:213298592355:web:85f7977ed27bb77da61656",
+        measurementId: "G-J8DSWWT6JQ",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cebadina Pury - Punto de Venta</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="icon" href="icon/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          <img src="img/cebadina vaso.png" alt="Icono" class="logo-img" />
+          <img src="img/tex1.png" alt="Texto CEBADINA" class="logo-text-img" />
+          <img src="img/text2.png" alt="Texto PURY" class="logo-text-img" />
+        </div>
+
+        <div class="user-selector">
+          <button class="user-btn active" onclick="selectUser('Liliana')">
+            Liliana
+          </button>
+          <button class="user-btn" onclick="selectUser('Oscar Manuel')">
+            Oscar Manuel
+          </button>
+          <button class="user-btn" onclick="selectUser('Emmanuel')">
+            Emmanuel
+          </button>
+          <button class="user-btn" onclick="selectUser('Oscar')">Oscar</button>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="pos-section">
+          <h2 class="section-title">📋 Punto de Venta</h2>
+
+          <div class="products-grid">
+            <div class="product-card" onclick="selectProduct('small', 12)">
+              <div class="product-name">Cebadina Chica</div>
+              <div class="product-price">$12.00</div>
+              <div class="quantity-controls">
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('small', -1)"
+                >
+                  -
+                </button>
+                <span class="qty-display" id="qty-small">0</span>
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('small', 1)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="selectProduct('medium', 17)">
+              <div class="product-name">Cebadina Mediana</div>
+              <div class="product-price">$17.00</div>
+              <div class="quantity-controls">
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('medium', -1)"
+                >
+                  -
+                </button>
+                <span class="qty-display" id="qty-medium">0</span>
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('medium', 1)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div class="product-card" onclick="selectProduct('large', 37)">
+              <div class="product-name">Cebadina Litro</div>
+              <div class="product-price">$37.00</div>
+              <div class="quantity-controls">
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('large', -1)"
+                >
+                  -
+                </button>
+                <span class="qty-display" id="qty-large">0</span>
+                <button
+                  class="qty-btn"
+                  onclick="event.stopPropagation(); changeQuantity('large', 1)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-section">
+            <div class="payment-row">
+              <span
+                >Cebadina Chica (x<strong
+                  ><span id="display-small">0</span></strong
+                >):</span
+              >
+              <span
+                ><strong>$<span id="total-small">0.00</span></strong></span
+              >
+            </div>
+            <div class="payment-row">
+              <span
+                >Cebadina Mediana (x<strong
+                  ><span id="display-medium">0</span></strong
+                >):</span
+              >
+              <span
+                ><strong>$<span id="total-medium">0.00</span></strong></span
+              >
+            </div>
+            <div class="payment-row">
+              <span
+                >Cebadina Grande (x<strong
+                  ><span id="display-large">0</span></strong
+                >):</span
+              >
+              <span
+                ><strong>$<span id="total-large">0.00</span></strong></span
+              >
+            </div>
+
+            <div class="payment-row total-row">
+              <span>TOTAL:</span>
+              <span>$<span id="grand-total">0.00</span></span>
+            </div>
+
+            <div class="input-group">
+              <label for="customer-payment">💰 Pago del Cliente</label>
+              <input
+                type="number"
+                id="customer-payment"
+                placeholder="0.00"
+                step="0.01"
+                oninput="calculateChange()"
+              />
+            </div>
+
+            <div
+              class="change-display"
+              id="change-display"
+              style="display: none"
+            >
+              Cambio: $<span id="change-amount">0.00</span>
+            </div>
+
+            <button
+              class="btn-primary"
+              id="complete-sale-btn"
+              onclick="completeSale()"
+              disabled
+            >
+              💳 Completar Venta
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-section">
+          <h2 class="section-title">📊 Ventas del Día</h2>
+
+          <div class="sales-summary">
+            <div class="summary-card">
+              <div class="summary-value" id="total-sales">0</div>
+              <div class="summary-label">Ventas Totales</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="total-revenue">$0</div>
+              <div class="summary-label">Ingresos</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="avg-sale">$0</div>
+              <div class="summary-label">Venta Promedio</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="small-sales">0</div>
+              <div class="summary-label">Cebadina Chica</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="medium-sales">0</div>
+              <div class="summary-label">Cebadina Mediana</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="large-sales">0</div>
+              <div class="summary-label">Cebadina Grande</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+          </div>
+
+          <div class="sales-history" id="sales-history">
+            <div style="text-align: center; color: #666; padding: 20px">
+              No hay ventas registradas hoy
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification" id="notification">
+      ✅ Venta registrada exitosamente
+    </div>
+
+    <script>
+      // Variables globales
+      let currentUser = "Liliana";
+      let cart = {
+        small: 0,
+        medium: 0,
+        large: 0,
+      };
+      let prices = {
+        small: 12,
+        medium: 17,
+        large: 37,
+      };
+      let salesData = JSON.parse(localStorage.getItem("salesData")) || [];
+      let salesChart;
+
+      // Funciones de usuario
+      function selectUser(userName) {
+        currentUser = userName;
+        document.querySelectorAll(".user-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        event.target.classList.add("active");
+      }
+
+      // Funciones de producto
+      function selectProduct(size, price) {
+        changeQuantity(size, 1);
+      }
+
+      function changeQuantity(size, delta) {
+        cart[size] = Math.max(0, cart[size] + delta);
+        updateDisplay();
+      }
+
+      function updateDisplay() {
+        // Actualizar cantidades individuales
+        document.getElementById("qty-small").textContent = cart.small;
+        document.getElementById("qty-medium").textContent = cart.medium;
+        document.getElementById("qty-large").textContent = cart.large;
+
+        // Actualizar display de cantidades
+        document.getElementById("display-small").textContent = cart.small;
+        document.getElementById("display-medium").textContent = cart.medium;
+        document.getElementById("display-large").textContent = cart.large;
+
+        // Actualizar totales
+        const totalSmall = cart.small * prices.small;
+        const totalMedium = cart.medium * prices.medium;
+        const totalLarge = cart.large * prices.large;
+        const grandTotal = totalSmall + totalMedium + totalLarge;
+
+        document.getElementById("total-small").textContent =
+          totalSmall.toFixed(2);
+        document.getElementById("total-medium").textContent =
+          totalMedium.toFixed(2);
+        document.getElementById("total-large").textContent =
+          totalLarge.toFixed(2);
+        document.getElementById("grand-total").textContent =
+          grandTotal.toFixed(2);
+
+        // Actualizar estados visuales de las tarjetas
+        document.querySelectorAll(".product-card").forEach((card, index) => {
+          card.classList.remove("selected");
+          const sizes = ["small", "medium", "large"];
+          if (cart[sizes[index]] > 0) {
+            card.classList.add("selected");
+          }
+        });
+
+        calculateChange();
+      }
+
+      function calculateChange() {
+        const total = parseFloat(
+          document.getElementById("grand-total").textContent
+        );
+        const payment =
+          parseFloat(document.getElementById("customer-payment").value) || 0;
+        const change = payment - total;
+
+        const changeDisplay = document.getElementById("change-display");
+        const changeAmount = document.getElementById("change-amount");
+        const completeBtn = document.getElementById("complete-sale-btn");
+
+        if (payment > 0 && total > 0) {
+          changeAmount.textContent = change.toFixed(2);
+          changeDisplay.style.display = "block";
+
+          if (change >= 0) {
+            changeDisplay.style.background =
+              "linear-gradient(45deg, #ffc107, #ff9800)"; // amarillo-naranja
+            completeBtn.disabled = false;
+          } else {
+            changeDisplay.style.background =
+              "linear-gradient(45deg, #f44336, #d32f2f)"; // tonos rojos
+            completeBtn.disabled = true;
+          }
+        } else {
+          changeDisplay.style.display = "none";
+          completeBtn.disabled = true;
+        }
+      }
+
+      async function completeSale() {
+        const total = parseFloat(
+          document.getElementById("grand-total").textContent
+        );
+        const payment = parseFloat(
+          document.getElementById("customer-payment").value
+        );
+
+        if (total <= 0 || payment < total) return;
+
+        const sale = {
+          date: new Date().toISOString(),
+          user: currentUser,
+          items: {
+            small: cart.small,
+            medium: cart.medium,
+            large: cart.large,
+          },
+          total: total,
+          payment: payment,
+          change: payment - total,
+        };
+
+        try {
+          await db.collection("sales").add(sale);
+          showNotification();
+
+          cart = { small: 0, medium: 0, large: 0 };
+          document.getElementById("customer-payment").value = "";
+          updateDisplay();
+          updateStats();
+        } catch (error) {
+          console.error("Error al guardar venta en Firebase:", error);
+        }
+      }
+
+      function showNotification() {
+        const notification = document.getElementById("notification");
+        notification.classList.add("show");
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      async function updateStats() {
+        const today = new Date().toDateString();
+
+        try {
+          const snapshot = await db.collection("sales").get();
+          const allSales = [];
+
+          snapshot.forEach((doc) => {
+            allSales.push(doc.data());
+          });
+
+          const todaySales = allSales.filter(
+            (sale) => new Date(sale.date).toDateString() === today
+          );
+
+          const totalSales = todaySales.length;
+          const totalRevenue = todaySales.reduce(
+            (sum, sale) => sum + sale.total,
+            0
+          );
+          const avgSale = totalSales > 0 ? totalRevenue / totalSales : 0;
+          // 👉 Contar ventas por tipo de cebadina
+          let smallSales = 0;
+          let mediumSales = 0;
+          let largeSales = 0;
+
+          todaySales.forEach((sale) => {
+            smallSales += sale.items?.small || 0;
+            mediumSales += sale.items?.medium || 0;
+            largeSales += sale.items?.large || 0;
+          });
+          //Mostrar ventas (numero de chicas, medianas, grandes) por presentación
+          document.getElementById("small-sales").textContent = smallSales;
+          document.getElementById("medium-sales").textContent = mediumSales;
+          document.getElementById("large-sales").textContent = largeSales;
+
+          document.getElementById("total-sales").textContent = totalSales;
+          document.getElementById(
+            "total-revenue"
+          ).textContent = `$${totalRevenue.toFixed(2)}`;
+          document.getElementById("avg-sale").textContent = `$${avgSale.toFixed(
+            2
+          )}`;
+
+          updateSalesHistory(todaySales);
+          updateChart(todaySales);
+        } catch (error) {
+          console.error("Error al obtener ventas de Firebase:", error);
+        }
+      }
+
+      function updateSalesHistory(sales) {
+        const historyContainer = document.getElementById("sales-history");
+
+        if (sales.length === 0) {
+          historyContainer.innerHTML = `
+      <div style="text-align: center; color: #666; padding: 20px;">
+        No hay ventas registradas hoy
+      </div>
+    `;
+          return;
+        }
+
+        historyContainer.innerHTML = sales
+          .reverse()
+          .map(
+            (sale) => `
+      <div class="sale-item">
+        <div>
+          <strong>${new Date(sale.date).toLocaleTimeString()}</strong><br>
+          <small>${sale.user} - Ch:${sale.items.small} Med:${
+              sale.items.medium
+            } Gr:${sale.items.large}</small>
+        </div>
+        <div>
+          <strong>$${sale.total.toFixed(2)}</strong>
+        </div>
+      </div>
+    `
+          )
+          .join("");
+      }
+
+      function updateChart(sales) {
+        const ctx = document.getElementById("salesChart").getContext("2d");
+
+        const hourlyData = new Array(24).fill(0);
+        sales.forEach((sale) => {
+          const hour = new Date(sale.date).getHours();
+          hourlyData[hour] += sale.total;
+        });
+
+        if (salesChart) {
+          salesChart.destroy();
+        }
+
+        salesChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+            datasets: [
+              {
+                label: "Ventas por Hora",
+                data: hourlyData,
+                backgroundColor: "rgba(102, 126, 234, 0.7)",
+                borderColor: "rgba(102, 126, 234, 1)",
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return "$" + value.toFixed(0);
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Inicialización
+      document.addEventListener("DOMContentLoaded", function () {
+        updateDisplay();
+        updateStats();
+      });
+
+      // Eventos del teclado
+      document.addEventListener("keydown", function (e) {
+        if (
+          e.key === "Enter" &&
+          !document.getElementById("complete-sale-btn").disabled
+        ) {
+          completeSale();
+        }
+      });
+    </script>
+  </body>
+</html>
