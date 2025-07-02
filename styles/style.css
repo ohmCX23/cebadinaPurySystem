@@ -32,17 +32,17 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  gap: 15px; /* espacio entre cada imagen */
+  gap: 8px; /* espacio entre cada imagen */
   padding: 10px;
 }
 
 .logo-img {
-  width: 50px; /* tamaño del ícono (ej. botellita) */
+  width: 40px; /* tamaño del ícono (ej. botellita) */
   height: auto;
 }
 
 .logo-text-img {
-  height: 40px; /* altura uniforme para el texto (ajústala a lo que quede mejor) */
+  height: 30px; /* altura uniforme para el texto (ajústala a lo que quede mejor) */
   width: auto;
 }
 
@@ -60,7 +60,7 @@ body {
   background: #f0f0f0;
   transition: all 0.3s ease;
   font-weight: 500;
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .user-btn.active {
@@ -130,7 +130,7 @@ body {
 }
 
 .product-price {
-  font-size: 1.3rem;
+  font-size: 40px;
   color: #ff9900;
   font-weight: bold;
   margin-bottom: 15px;
@@ -145,8 +145,8 @@ body {
 }
 
 .qty-btn {
-  width: 35px;
-  height: 35px;
+  width: 55px;
+  height: 55px;
   border: none;
   border-radius: 50%;
   background: #667eea;
@@ -154,6 +154,7 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 25px;
 }
 
 .qty-btn:hover {
@@ -162,7 +163,7 @@ body {
 }
 
 .qty-display {
-  font-size: 1.2rem;
+  font-size: 30px;
   font-weight: bold;
   min-width: 40px;
   text-align: center;
@@ -184,7 +185,7 @@ body {
 }
 
 .total-row {
-  font-size: 1.3rem;
+  font-size: 30px;
   font-weight: bold;
   color: #ee0202;
   border-top: 2px solid #667eea;
@@ -207,7 +208,7 @@ body {
   padding: 12px;
   border: 2px solid #e9ecef;
   border-radius: 10px;
-  font-size: 1.1rem;
+  font-size: 25px;
   transition: border-color 0.3s ease;
 }
 
