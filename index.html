@@ -37,16 +37,21 @@
         </div>
 
         <div class="user-selector">
-          <button class="user-btn active" onclick="selectUser('Liliana')">
-            Liliana
-          </button>
-          <button class="user-btn" onclick="selectUser('Oscar Manuel')">
-            Oscar Manuel
-          </button>
-          <button class="user-btn" onclick="selectUser('Emmanuel')">
+          <button
+            class="user-btn active"
+            onclick="selectUser('Emmanuel', event)"
+          >
             Emmanuel
           </button>
-          <button class="user-btn" onclick="selectUser('Oscar')">Oscar</button>
+          <button class="user-btn" onclick="selectUser('Oscar Manuel', event)">
+            Oscar Manuel
+          </button>
+          <button class="user-btn" onclick="selectUser('Liliana', event)">
+            Liliana
+          </button>
+          <button class="user-btn" onclick="selectUser('Oscar', event)">
+            Oscar
+          </button>
         </div>
       </div>
 
@@ -224,7 +229,12 @@
           </div>
           <br /><br />
           <div style="text-align: center">
-            <button class="btn-primary" onclick="generatePDFReport()">
+            <button
+              class="btn-primary"
+              id="generate-report-btn"
+              onclick="generatePDFReport()"
+              disabled
+            >
               📊 Generar Reporte PDF
             </button>
           </div>
@@ -238,7 +248,7 @@
 
     <script>
       // Variables globales
-      let currentUser = "Liliana";
+      let currentUser = "Emmanuel";
       let cart = {
         small: 0,
         medium: 0,
@@ -252,13 +262,25 @@
       let salesData = JSON.parse(localStorage.getItem("salesData")) || [];
       let salesChart;
 
-      // Funciones de usuario
-      function selectUser(userName) {
+      // Función modificada para activar el botón si es Liliana
+      function selectUser(userName, event) {
         currentUser = userName;
+
+        // Quitar clase active a todos
         document.querySelectorAll(".user-btn").forEach((btn) => {
           btn.classList.remove("active");
         });
+
+        // Agregar clase active al botón seleccionado
         event.target.classList.add("active");
+
+        // Habilitar o deshabilitar el botón de PDF
+        const reportBtn = document.getElementById("generate-report-btn");
+        if (userName === "Liliana") {
+          reportBtn.disabled = false;
+        } else {
+          reportBtn.disabled = true;
+        }
       }
 
       // Funciones de producto
