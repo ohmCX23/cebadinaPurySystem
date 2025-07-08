@@ -343,4 +343,26 @@ body {
   .products-grid {
     grid-template-columns: 1fr;
   }
+
+  .btn-generate {
+    background: linear-gradient(135deg, #fff200 0%, #9dff00 100%);
+    color: rgb(0, 0, 0);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .btn-generate:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
