@@ -654,23 +654,38 @@
               doc.setFontSize(20).setTextColor(255, 165, 0);
               doc.text("Gráfica de Ventas por Hora", 20, yPos);
               yPos += 10;
-              const xCenter = (doc.internal.pageSize.getWidth() - imgWidth) / 2;
+              // Dimensiones de la página y margen disponible
+              const pageHeight = doc.internal.pageSize.getHeight();
+              const maxImgHeight = 270 - yPos; // límite inferior como en tu código
 
-              // Insertamos la imagen
+              // Escalamos si la imagen es muy alta
+              let drawWidth = imgWidth;
+              let drawHeight = imgHeight;
+
               if (yPos + imgHeight <= 270) {
-                doc.addImage(
-                  imgData,
-                  "PNG",
-                  xCenter,
-                  yPos,
-                  imgWidth,
-                  imgHeight
-                );
+                // Cabe sin problemas, usar tamaño original
+                drawWidth = imgWidth;
+                drawHeight = imgHeight;
               } else {
-                doc.setFontSize(10);
-                doc.setTextColor(150, 150, 150);
-                doc.text("(Gráfica muy grande para el espacio)", 20, yPos);
+                // Escalar proporcionalmente para que quepa en el espacio
+                const scale = maxImgHeight / imgHeight;
+                drawWidth = imgWidth * scale;
+                drawHeight = maxImgHeight;
               }
+
+              // Centrado horizontal
+              const xCenter =
+                (doc.internal.pageSize.getWidth() - drawWidth) / 2;
+
+              // Insertar imagen escalada
+              doc.addImage(
+                imgData,
+                "PNG",
+                xCenter,
+                yPos,
+                drawWidth,
+                drawHeight
+              );
 
               // === Mostrar valores solo si son > 0 ===
               const chartInstance =
