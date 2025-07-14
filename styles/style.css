@@ -365,4 +365,62 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
   }
+  .expenses-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .expense-form {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 20px;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 20px;
+  }
+
+  .expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff5f5, #ffeaea);
+    border-radius: 8px;
+    border-left: 4px solid #f44336;
+  }
+
+  .expense-item:last-child {
+    margin-bottom: 0;
+  }
+
+  #expense-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #4caf50, #45a049);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+
+  #expense-notification.show {
+    transform: translateX(0);
+  }
+  .pos-section {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente si hay espacio */
+    flex-direction: column; /* Apila en columna */
+    padding: 20px;
+    min-height: 100vh; /* Que tome al menos el alto de la ventana */
+    background-color: #f1f3f5; /* Fondo suave opcional */
+    box-sizing: border-box;
+  }
 }

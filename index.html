@@ -239,14 +239,55 @@
             </button>
           </div>
         </div>
+        <div class="pos-section">
+          <div class="expenses-section">
+            <h2 class="section-title">💰 Gastos del Día</h2>
+
+            <div class="expense-form">
+              <div class="input-group">
+                <label for="expense-description"
+                  >📝 Descripción del Gasto</label
+                >
+                <input
+                  type="text"
+                  id="expense-description"
+                  placeholder="Vasos"
+                  maxlength="100"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="expense-amount">💵 Monto</label>
+                <input
+                  type="number"
+                  id="expense-amount"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+
+              <button class="btn-primary" onclick="addExpense()">
+                ➕ Agregar Gasto
+              </button>
+            </div>
+
+            <div class="expense-history" id="expense-history">
+              <div style="text-align: center; color: #666; padding: 20px"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="notification" id="notification">
       ✅ Venta registrada exitosamente
     </div>
-
+    <div class="notification" id="expense-notification">
+      ✅ Gasto registrado exitosamente
+    </div>
     <script>
+      updateExpenseHistory();
       // Variables globales
       let currentUser = "Emmanuel";
       let cart = {
@@ -556,9 +597,9 @@
         }
       });
 
-      //Metodo para generar reporte
+      // Función modificada para generar reporte con gastos
       async function generatePDFReport() {
-        const button = document.querySelector(".btn-generate");
+        const button = document.querySelector("#generate-report-btn");
 
         if (button) {
           button.disabled = true;
@@ -581,14 +622,23 @@
             document.getElementById(id)?.textContent || "0";
 
           const totalSales = getText("total-sales");
-          const totalRevenue = getText("total-revenue");
+          const totalRevenue = parseFloat(
+            getText("total-revenue").replace("$", "")
+          );
           const smallSales = getText("small-sales");
           const mediumSales = getText("medium-sales");
           const largeSales = getText("large-sales");
 
+          // Obtener gastos del día
+          const todayExpenses = await getTodayExpenses();
+          const totalExpenses = todayExpenses.reduce(
+            (sum, expense) => sum + expense.amount,
+            0
+          );
+          const netProfit = totalRevenue - totalExpenses;
+
           // === Encabezado ===
           doc.setFont("helvetica");
-
           doc.setFontSize(22).setTextColor(220, 38, 38);
 
           const title = "Reporte Diario de Ventas - Cebadina Pury";
@@ -600,33 +650,81 @@
 
           // Fecha
           doc.setFontSize(11).setTextColor(100, 100, 100);
-          doc.text(`Fecha: ${formattedDate}`, 20, 32); // +12 desde el título para mejor separación
+          doc.text(`Fecha: ${formattedDate}`, 20, 32);
 
-          let yPos = 50; // Espacio después de la fecha
+          let yPos = 50;
 
           // === Resumen de Ventas ===
-          // Título sección
-          doc.setFontSize(20).setTextColor(255, 165, 0); // naranja
+          doc.setFontSize(20).setTextColor(255, 165, 0);
           doc.text("Resumen de Ventas", 20, yPos);
-          yPos += 18; // espacio después del título
+          yPos += 18;
 
-          // Texto resumen
           doc.setFontSize(15).setTextColor(0, 0, 0);
           doc.text(`Total de Ventas: ${totalSales}`, 20, yPos);
-          yPos += 7; // separación línea 1 a 2
-          doc.text(`Ingresos Totales: ${totalRevenue}`, 20, yPos);
-          yPos += 20; // espacio antes siguiente sección
+          yPos += 7;
+          doc.text(`Ingresos Totales: $${totalRevenue.toFixed(2)}`, 20, yPos);
+          yPos += 20;
+
+          // === Gastos del Día ===
+          doc.setFontSize(20).setTextColor(255, 165, 0);
+          doc.text("Gastos del Día", 20, yPos);
+          yPos += 18;
+
+          doc.setFontSize(15).setTextColor(0, 0, 0);
+          doc.text(`Total de Gastos: $${totalExpenses.toFixed(2)}`, 20, yPos);
+          yPos += 7;
+
+          // Mostrar detalle de gastos si hay
+          if (todayExpenses.length > 0) {
+            doc.setFontSize(12).setTextColor(100, 100, 100);
+            todayExpenses.forEach((expense) => {
+              doc.text(
+                `• ${expense.description}: $${expense.amount.toFixed(2)}`,
+                25,
+                yPos
+              );
+              yPos += 5;
+            });
+          } else {
+            doc.setFontSize(12).setTextColor(100, 100, 100);
+            doc.text("No hay gastos registrados", 25, yPos);
+            yPos += 5;
+          }
+
+          yPos += 10;
+
+          // === Ganancia Neta ===
+          doc.setFontSize(20).setTextColor(255, 165, 0);
+          doc.text("Ganancia Neta", 20, yPos);
+          yPos += 18;
+
+          doc.setFontSize(15);
+          if (netProfit >= 0) {
+            doc.setTextColor(0, 150, 0); // Verde para ganancias
+          } else {
+            doc.setTextColor(220, 38, 38); // Rojo para pérdidas
+          }
+          doc.text(`$${netProfit.toFixed(2)}`, 20, yPos);
+          yPos += 7;
+
+          doc.setFontSize(12).setTextColor(100, 100, 100);
+          doc.text(
+            `(Ingresos: $${totalRevenue.toFixed(
+              2
+            )} - Gastos: $${totalExpenses.toFixed(2)})`,
+            20,
+            yPos
+          );
+          yPos += 20;
 
           // === Ventas por Tamaño ===
-          // Título sección
           doc.setFontSize(20).setTextColor(255, 165, 0);
           doc.text("Ventas por Tamaño", 20, yPos);
-          yPos += 15; // separación para que no quede pegado
+          yPos += 15;
 
-          // Fondo tabla ventas por tamaño
           doc.setFontSize(15).setTextColor(0, 0, 0);
           doc.setFillColor(250, 250, 250);
-          doc.rect(5, yPos - 6, 180, 30, "F"); // ajustado alto para un poco más de espacio
+          doc.rect(5, yPos - 6, 180, 30, "F");
 
           const productos = [
             ["Chica", smallSales],
@@ -657,7 +755,6 @@
 
           if (chartCanvas) {
             try {
-              // Primero, captura tu gráfica con html2canvas
               const canvas = await html2canvas(chartCanvas, {
                 backgroundColor: "#ffffff",
                 scale: 1.5,
@@ -667,39 +764,35 @@
                 height: chartCanvas.height,
               });
 
-              // Preparamos la imagen para jsPDF
               const imgData = canvas.toDataURL("image/png", 0.8);
               const imgWidth = 170;
               const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-              // Título de la sección
+              doc.addPage(); // 👉 crea la página 2
+
+              yPos = 20; // reinicia la posición Y para la nueva página
               doc.setFontSize(20).setTextColor(255, 165, 0);
               doc.text("Gráfica de Ventas por Hora", 20, yPos);
               yPos += 10;
-              // Dimensiones de la página y margen disponible
-              const pageHeight = doc.internal.pageSize.getHeight();
-              const maxImgHeight = 270 - yPos; // límite inferior como en tu código
 
-              // Escalamos si la imagen es muy alta
+              const pageHeight = doc.internal.pageSize.getHeight();
+              const maxImgHeight = 270 - yPos;
+
               let drawWidth = imgWidth;
               let drawHeight = imgHeight;
 
               if (yPos + imgHeight <= 270) {
-                // Cabe sin problemas, usar tamaño original
                 drawWidth = imgWidth;
                 drawHeight = imgHeight;
               } else {
-                // Escalar proporcionalmente para que quepa en el espacio
                 const scale = maxImgHeight / imgHeight;
                 drawWidth = imgWidth * scale;
                 drawHeight = maxImgHeight;
               }
 
-              // Centrado horizontal
               const xCenter =
                 (doc.internal.pageSize.getWidth() - drawWidth) / 2;
 
-              // Insertar imagen escalada
               doc.addImage(
                 imgData,
                 "PNG",
@@ -708,12 +801,6 @@
                 drawWidth,
                 drawHeight
               );
-
-              // === Mostrar valores solo si son > 0 ===
-              const chartInstance =
-                Chart.getChart(chartCanvas) || chartCanvas.chart;
-              const data = chartInstance.data.datasets[0].data;
-              const meta = chartInstance.getDatasetMeta(0);
 
               yPos += imgHeight + 10;
             } catch (err) {
@@ -736,7 +823,7 @@
           }.pdf`;
           doc.save(fileName);
 
-          console.log("✅ PDF generado exitosamente con fuentes más grandes");
+          console.log("✅ PDF generado exitosamente con gastos incluidos");
         } catch (error) {
           console.error("❌ Error generando el reporte:", error);
           alert("Error al generar el reporte. Intenta de nuevo.");
@@ -747,6 +834,130 @@
           }
         }
       }
+      // Función para agregar un gasto
+      async function addExpense() {
+        const description = document
+          .getElementById("expense-description")
+          .value.trim();
+        const amount = parseFloat(
+          document.getElementById("expense-amount").value
+        );
+
+        if (!description || !amount || amount <= 0) {
+          alert("Por favor ingresa una descripción y un monto válido");
+          return;
+        }
+
+        const expense = {
+          date: new Date().toISOString(),
+          user: currentUser,
+          description: description,
+          amount: amount,
+        };
+
+        try {
+          await db.collection("expenses").add(expense);
+
+          // Limpiar campos
+          document.getElementById("expense-description").value = "";
+          document.getElementById("expense-amount").value = "";
+
+          // Actualizar estadísticas
+          updateStats();
+          updateExpenseHistory();
+
+          // Mostrar notificación
+          showExpenseNotification();
+        } catch (error) {
+          console.error("Error al guardar gasto en Firebase:", error);
+          alert("Error al guardar el gasto. Intenta de nuevo.");
+        }
+      }
+
+      // Función para mostrar notificación de gasto agregado
+      function showExpenseNotification() {
+        const notification = document.getElementById("expense-notification");
+        notification.classList.add("show");
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+      // Función para actualizar el historial de gastos
+      async function updateExpenseHistory() {
+        const today = new Date().toDateString();
+
+        try {
+          const snapshot = await db.collection("expenses").get();
+          const allExpenses = [];
+
+          snapshot.forEach((doc) => {
+            allExpenses.push(doc.data());
+          });
+
+          const todayExpenses = allExpenses.filter(
+            (expense) => new Date(expense.date).toDateString() === today
+          );
+
+          const historyContainer = document.getElementById("expense-history");
+
+          if (todayExpenses.length === 0) {
+            historyContainer.innerHTML = `
+        <div style="text-align: center; color: #666; padding: 20px;">
+          No hay gastos registrados hoy
+        </div>
+      `;
+            return;
+          }
+
+          historyContainer.innerHTML =
+            `
+  <h1 class="section-title"> <br>📋 Historial de Gastos</h1>
+` +
+            todayExpenses
+              .reverse()
+              .map(
+                (expense) => `
+    <div class="expense-item">
+      <div>
+        <strong>${new Date(expense.date).toLocaleTimeString()}</strong><br>
+        <small>${expense.user} - ${expense.description}</small>
+      </div>
+      <div>
+        <strong style="color: #f44336;">-$${expense.amount.toFixed(2)}</strong>
+      </div>
+    </div>
+  `
+              )
+              .join("");
+        } catch (error) {
+          console.error("Error al obtener gastos de Firebase:", error);
+        }
+      }
+      // Función para obtener gastos del día
+      async function getTodayExpenses() {
+        const today = new Date().toDateString();
+
+        try {
+          const snapshot = await db.collection("expenses").get();
+          const allExpenses = [];
+
+          snapshot.forEach((doc) => {
+            allExpenses.push(doc.data());
+          });
+
+          const todayExpenses = allExpenses.filter(
+            (expense) => new Date(expense.date).toDateString() === today
+          );
+
+          return todayExpenses;
+        } catch (error) {
+          console.error("Error al obtener gastos:", error);
+          return [];
+        }
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        updateExpenseHistory(); // Cargar los gastos en cuanto se abre la página
+      });
     </script>
   </body>
 </html>
